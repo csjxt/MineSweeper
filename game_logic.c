@@ -75,7 +75,7 @@ void levelSelect(void) {
 			row = exception("행을 입력하시오", 1, MAX_ROW);
 			col = exception("열을 입력하시오", 1, MAX_COL);
 
-			if (row * col < 10) {
+			if (row * col < 10) {	//첫클릭과 주변8칸 제외하고 최소1칸 필요
 				printf("보드 크기가 너무 작습니다.\n");
 				printf("최소 1개의 지뢰를 배치할 공간이 없습니다.\n");
 				printf("(총 10칸 이상 필요) 난이도를 다시 선택해주세요.\n");
@@ -147,6 +147,7 @@ void near8space(void) {
 					int real_row = i + x;	//실제 행
 					int real_col = j + y;	//실제 열
 
+					//보드 범위를 벗어낫는지 확인
 					if (real_row >= 0 && real_row < row && real_col >= 0 && real_col < col) {
 						if (board[real_row][real_col] == MINE) {
 							near_mine_count++;
