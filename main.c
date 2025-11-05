@@ -22,42 +22,43 @@ int main(void) {
 	mineSet(first_row, first_col);
 	near8space();
 
+	open8space(first_row, first_col); // 첫 클릭 시 주변 비어있는 칸 오픈
 
-	/*출력 테스트 
+	int user_row, user_col; //행 열 입력받는 변수
 
+	for (;;) {
+		printf("\033[2J");
+		printf("\033[H");
+		boardPrint();
 
-
-	1,2,3번 역할 담당이 밑내용 삭제후 코드 작성 
-
-
-
-	*/
-
-	printf("\n정답보드\n\n");
-	printf("    ");
-	for (int j = 0; j < col; j++) {
-		printf("%2d ", j + 1);
-	}
-	printf("\n");
-
-	for (int i = 0; i < row; i++) {
-
-		printf("%2d | ", i + 1);
-
-		for (int j = 0; j < col; j++) {
-
-			if (board[i][j] == MINE) {
-				printf(" * "); // 지뢰 표시
-			}
-			else {
-				printf(" %d ", board[i][j]);
-			}
+		if (hidden_count == mine_count) { // 커스텀 난이도에서 첫 클릭으로 인한 빈칸 열림 때문에 지뢰 위치가 바로 특정되는 경우
+			printf("지뢰 위치가 특정되어 게임이 끝났습니다.\n");
+			break;
 		}
+
+		user_row = exception("열 행 입력", 1, row);
+		user_col = exception("열 열 입력", 1, col);
+
+		user_row--;	//인덱스 값으로 변경
+		user_col--;
+
+		if (show_board[user_row][user_col] == OPEN) {
+			printf("이미 연 칸입니다. 다른 칸을 선택하세요.\n");
+			printf("계속 하려면 Enter를 누르세요.");
+			while (getchar() != '\n');
+			continue;
+		}
+		if (board[user_row][user_col] != MINE) {
+			show_board[user_row][user_col] = OPEN;
+			hidden_count--;
+		}
+
+		if (WinOrLose(user_row, user_col) == 0)
+			break;
+
 		printf("\n");
 	}
 
-	printf("\n");
-	printf("선택한 좌표 (%d행 %d열)의 값: %d\n\n", first_row + 1, first_col + 1, board[first_row][first_col]);
 
-	return 0;
+		return 0;
 }
