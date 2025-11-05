@@ -7,6 +7,7 @@
 int row;
 int col;
 int mine_count;
+int hidden_count;
 int board[MAX_ROW][MAX_COL];
 int show_board[MAX_ROW][MAX_COL];
 
@@ -56,18 +57,21 @@ void levelSelect(void) {
 			row = 9;
 			col = 9;
 			mine_count = 10;
+			hidden_count = row * col;
 			break;
 		}
 		else if (level == 2) {
 			row = 16;
 			col = 16;
 			mine_count = 40;
+			hidden_count = row * col;
 			break;
 		}
 		else if (level == 3) {
 			row = 16;
 			col = 30;
 			mine_count = 99;
+			hidden_count = row * col;
 			break;
 		}
 		else if (level == 4) {
@@ -84,6 +88,7 @@ void levelSelect(void) {
 
 			int max_mines = (row * col) - 9;	//지뢰를 배치할수있는 최대 개수			
 			mine_count = exception("지뢰 개수를 입력하시오", 1, max_mines);
+			hidden_count = row * col;
 
 			break;
 		}
@@ -157,6 +162,94 @@ void near8space(void) {
 				}
 			}
 			board[i][j] = near_mine_count;
+		}
+	}
+}
+
+void boardPrint(void) {
+
+	printf("\n현재 보드 상태");
+	printf("\t\t지뢰 개수: %d", mine_count);
+	printf("\n\n");
+	printf("     ");
+
+	for (int j = 0; j < col; j++) { // 열 출력
+		printf("%2d ", j + 1);
+	}
+	printf("\n");
+
+	for (int i = 0; i < row; i++) { // 행 출력
+		printf("%2d | ", i + 1);
+		for (int j = 0; j < col; j++) {
+
+			if (show_board[i][j] == HIDDEN) { //안 열린 칸: #
+				printf(" # ");
+			}
+			else if (show_board[i][j] == OPEN) {
+				if (board[i][j] == MINE)
+					printf(" * "); //지뢰칸: *
+				else if (board[i][j] == Clicked_MINE)
+					printf(" X "); // 연 지뢰칸: X
+				else
+					printf(" %d ", board[i][j]); // 지뢰가 아닌 칸: 주변 8칸 지뢰개수
+			}
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
+
+int WinOrLose(int user_row, int user_col) {
+
+	if (hidden_count == mine_count) {
+
+		printf("\033[2J");	// 화면 지우기
+		printf("\033[H");	// 커서 맨 위로 이동
+		boardPrint();
+		printf("지뢰가 없는 칸을 모두 열었습니다. 게임 승리\n");
+
+		return 0;
+	}
+
+	if (board[user_row][user_col] == MINE) {
+		board[user_row][user_col] = Clicked_MINE;
+
+		for (int i = 0; i < row; i++) { // 모든 칸 오픈
+			for (int j = 0; j < col; j++) {
+				show_board[i][j] = OPEN;
+			}
+		}
+		printf("\033[2J");
+		printf("\033[H");
+		boardPrint();
+		printf("지뢰를 찾았습니다. 게임 패배\n");
+
+		return 0;
+	}
+	return 1; // 게임 진행 중
+}
+
+void open8space(int user_row, int user_col) {
+
+	if (board[user_row][user_col] == MINE) return;
+	if (show_board[user_row][user_col] != HIDDEN) return;
+
+	show_board[user_row][user_col] = OPEN;
+	hidden_count--;
+
+	if (board[user_row][user_col] != 0) return;
+
+	//주변 8칸 열기
+	for (int x = -1; x <= 1; x++) {
+		for (int y = -1; y <= 1; y++) {
+
+			if (x == 0 && y == 0) continue;
+
+			int real_row = user_row + x;
+			int real_col = user_col + y;
+			if (real_row >= 0 && real_row < row && real_col >= 0 && real_col < col)
+				open8space(real_row, real_col);
 		}
 	}
 }
