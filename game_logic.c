@@ -253,3 +253,24 @@ void open8space(int user_row, int user_col) {
 		}
 	}
 }
+
+
+//Ãß°¡
+void move_cursor(Cursor* cur, int max_row, int max_col, int key) {
+	switch (key) {
+	case 'w': case 'W':
+		if (cur->r > 0) cur->r--;
+		break;
+	case 's': case 'S':
+		if (cur->r < max_row - 1) cur->r++;
+		break;
+	case 'a': case 'A':
+		if (cur->c > 0) cur->c--;
+		break;
+	case 'd': case 'D':
+		if (cur->c < max_col - 1) cur->c++;
+		break;
+	default:
+		break;
+	}
+}
