@@ -1,9 +1,7 @@
 #pragma once
 
-
-
-#ifndef COMMON_H //추가
-#define COMMON_H //추가
+#ifndef COMMON_H 
+#define COMMON_H 
 
 #define MAX_ROW 70 //최대행 70
 #define MAX_COL 70 //최대열 70
@@ -21,9 +19,8 @@ extern int col; //열
 extern int mine_count; //지뢰개수
 extern int hidden_count; //열리지 않은 칸 개수
 
-
-extern int board[MAX_ROW][MAX_COL];	//값 바꾸면 안됨(정답보드)
-extern int show_board[MAX_ROW][MAX_COL];	//사용자에게 보여줄 보드
+extern int board[MAX_ROW][MAX_COL];	
+extern int show_board[MAX_ROW][MAX_COL]; //사용자에게 보여줄 보드
 
 void ClearBuffer(void);    //입력 버퍼 비우는 함수
 void levelSelect(void);	//난이도 선택 함수
@@ -36,14 +33,27 @@ void boardPrint(void); //보드 출력하는 함수
 int WinOrLose(int user_row, int user_col); //승패 판정 함수
 void open8space(int user_row, int user_col); //빈칸인 주변 8칸 여는 함수
 
+// 메시지 API
+void ui_set_message(const char* s);
+void ui_clear_message(void);
 
-//추가
-// === Input handling ===
-// WASD로 커서 이동 (key는 getch()로 받은 값)
-typedef struct {
-    int r, c; // 커서 위치 (row, col)
-} Cursor;
+typedef struct { int x, y; } Cursor;
+extern Cursor g_cursor;
 
-void move_cursor(Cursor* cur, int max_row, int max_col, int key);
+typedef enum { ACT_NONE = 0, ACT_MOVE, ACT_OPEN } Action;  
+void cursor_init(int sx, int sy);
+void cursor_move(int dx, int dy, int W, int H);
+Action read_action(int* dx, int* dy, int W, int H);
+
+void   timer_start(void);
+void   timer_stop(void);
+double timer_elapsed_sec(void);
+void   timer_print_mmss(void);
+
+void draw_board_with_cursor_and_status(void);
 
 #endif
+
+
+
+
