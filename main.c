@@ -1,45 +1,29 @@
-﻿#include <windows.h>
-#include <conio.h>   // _getch()
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
+#ifdef _WIN32
+#include <conio.h>
+#include <windows.h>
+#endif
 #include "common.h"
 #pragma warning (disable:4996)
 
-/* 콘솔 기본 커서(흰색 |) 숨기기/보이기 */
-static void hide_console_caret(void) {
-    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO ci;
-    GetConsoleCursorInfo(h, &ci);
-    ci.bVisible = FALSE;
-    SetConsoleCursorInfo(h, &ci);
-}
-static void show_console_caret(void) {
-    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO ci;
-    GetConsoleCursorInfo(h, &ci);
-    ci.bVisible = TRUE;
-    SetConsoleCursorInfo(h, &ci);
-}
-
-/* Enter 키를 누를 때까지 대기 (다른 키는 무시) */
-static void wait_for_enter(void) {
-    for (;;) {
-        int ch = _getch();
-        if (ch == '\r' || ch == '\n') break;   // Enter
-        // 그 외 키는 무시
-    }
-}
-
 int main(void) {
-    int first_row, first_col;
+
+    int first_row, first_col; // 첫 번째 클릭
+
+    int cur_r = 0, cur_c = 0;        // 현재 커서(0-based)
+    time_t start_time = 0;           // 기준 시각(프로그램 시작)
+    int last_space_sec = 0;          // 마지막 Space 시각(초) — 흐르지 않음
+    int show_msg = 0;                // 이미 연 칸 알림 표시 여부
 
     srand((unsigned)time(NULL));
 
     levelSelect();
     reset();
 
-    // 첫 클릭 좌표 입력 (지뢰 배치에 반영)
+    // 첫 클릭 입력
     first_row = exception("첫 번째로 열 행", 1, row);
     first_col = exception("첫 번째로 열 열", 1, col);
     first_row--; first_col--;
@@ -48,62 +32,101 @@ int main(void) {
     near8space();
     open8space(first_row, first_col);
 
-    cursor_init(0, 0);
-    timer_start();
+    // 커서 시작 위치
+    cur_c = 0;
 
-    setvbuf(stdout, NULL, _IONBF, 0); // 출력 지연 제거
-    hide_console_caret();             // 시스템 커서 숨김
+    // 기준 시각 저장
+    start_time = time(NULL);
 
-    // 시작 화면 1회 출력
-    draw_board_with_cursor_and_status();
+    // 화면 정리
+    printf("\033[2J\033[H");
+
+    // 화면 위치 보정값 
+    const int TOP = 5;  
+    const int LEFT = 6;  
+    const int CELLW = 3;
 
     for (;;) {
-        int dx = 0, dy = 0;
-        Action act = read_action(&dx, &dy, col, row);
+        // 1) 화면 그리기 시작
+        printf("\033[H\x1b[?25l");
+        boardPrint();
 
-        if (act == ACT_MOVE) {
-            cursor_move(dx, dy, col, row);
-            draw_board_with_cursor_and_status();
-            continue;
+        // 승리 조기 종료 처리
+        if (hidden_count == mine_count) {
+            printf("\033[%d;1H", TOP + row + 2);
+            printf("지뢰 위치가 특정되어 게임이 끝났습니다.\n");
+            // 마지막에 커서만 보드 칸으로 보여주고 종료
+            int screenRow = TOP + cur_r;
+            int screenCol = LEFT + cur_c * CELLW + 2;
+            printf("\033[%d;%dH\x1b[?25h", screenRow, screenCol);
+            break;
         }
-        else if (act == ACT_OPEN) {
-            int y = g_cursor.y;
-            int x = g_cursor.x;
 
-            
-            if (show_board[y][x] == OPEN) {
-                ui_set_message("이미 연 칸입니다. 다른 칸을 선택하세요.\n계속하시려면 Enter를 누르세요.");
-                draw_board_with_cursor_and_status();
-                wait_for_enter();      // Enter를 누를 때까지 멈춤
-                ui_clear_message();    // 계속 진행할 때 메시지 해제
-                draw_board_with_cursor_and_status();
+        // 2) HUD 출력
+        int elapsed = last_space_sec; 
+        printf("\033[%d;1H", TOP + row + 2);
+        printf("Cursor : (%d, %d)\n", cur_r + 1, cur_c + 1);
+        printf("Time   : %02d:%02d\n", elapsed / 60, elapsed % 60);
+        printf("[WASD] 이동  [Space] 열기\n");
+        if (show_msg) {
+            printf("이미 연 칸입니다. 다른 칸을 선택하세요.\n계속 하려면 Enter를 누르세요.\n");
+        }
+        else {
+            printf("\n\n"); 
+        }
+
+        // 3) 커서를 보드 칸의 숫자 오른쪽에 보이게
+        int screenRow = TOP + cur_r;
+        int screenCol = LEFT + cur_c * CELLW + 2;
+        printf("\033[%d;%dH\x1b[?25h", screenRow, screenCol);
+        fflush(stdout);
+
+        // 4) 입력 처리
+#ifdef _WIN32
+        if (_kbhit()) {
+            int ch = _getch();
+
+            // 알림 중이면 Enter만 받기 (즉시 지우기)
+            if (show_msg) {
+                if (ch == '\r' || ch == '\n') {
+                    show_msg = 0;
+                    // 알림이 출력된 두 줄을 즉시 지움
+                    printf("\033[%d;1H\033[2K\033[1B\033[2K", TOP + row + 5);
+                    // 커서를 다시 보드 칸 위치로 복귀
+                    int screenRow = TOP + cur_r;
+                    int screenCol = LEFT + cur_c * CELLW + 2;
+                    printf("\033[%d;%dH", screenRow, screenCol);
+                    fflush(stdout);
+                }
                 continue;
+
             }
 
-            // 아직 안 연 칸이면 열기
-            ui_clear_message();        // 이전 경고 메시지 있으면 제거
-            open8space(y, x);
-            draw_board_with_cursor_and_status();
+            if (ch == 'w' || ch == 'W') { if (cur_r > 0)        cur_r--; }
+            else if (ch == 's' || ch == 'S') { if (cur_r < row - 1) cur_r++; }
+            else if (ch == 'a' || ch == 'A') { if (cur_c > 0)        cur_c--; }
+            else if (ch == 'd' || ch == 'D') { if (cur_c < col - 1) cur_c++; }
+            else if (ch == ' ') {
+                // Space 누른 순간의 시간 저장
+                last_space_sec = (int)(time(NULL) - start_time);
 
-            // 게임 종료/승패 판정
-            if (WinOrLose(y, x) == 0) {
-                timer_stop();
-                break;
+                if (show_board[cur_r][cur_c] == OPEN) {
+                    show_msg = 1;
+                }
+                else {
+                    if (board[cur_r][cur_c] != MINE) {
+                        open8space(cur_r, cur_c);
+                    }
+                    if (WinOrLose(cur_r, cur_c) == 0)
+                        break;
+                }
             }
-            if (hidden_count == mine_count) {
-                timer_stop();
-                ui_set_message("모든 지뢰를 찾았습니다! 게임 종료!");
-                draw_board_with_cursor_and_status();
-                break;
-            }
-            continue;
         }
-
-        // 다른 액션은 없으니 루프 계속
+        Sleep(10);
+#endif
     }
 
-    show_console_caret(); // 커서 복원
+    //커서 보이게 복구
+    printf("\x1b[?25h");
     return 0;
 }
-
-

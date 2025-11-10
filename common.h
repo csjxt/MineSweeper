@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef COMMON_H 
-#define COMMON_H 
-
 #define MAX_ROW 70 //최대행 70
 #define MAX_COL 70 //최대열 70
 
@@ -12,7 +9,6 @@
 
 #define MINE -1 //지뢰가 있는칸
 #define Clicked_MINE -2 //사용자가 연 지뢰칸
-
 
 extern int row; //행
 extern int col; //열
@@ -33,27 +29,7 @@ void boardPrint(void); //보드 출력하는 함수
 int WinOrLose(int user_row, int user_col); //승패 판정 함수
 void open8space(int user_row, int user_col); //빈칸인 주변 8칸 여는 함수
 
-// 메시지 API
-void ui_set_message(const char* s);
-void ui_clear_message(void);
-
-typedef struct { int x, y; } Cursor;
-extern Cursor g_cursor;
-
-typedef enum { ACT_NONE = 0, ACT_MOVE, ACT_OPEN } Action;  
-void cursor_init(int sx, int sy);
-void cursor_move(int dx, int dy, int W, int H);
-Action read_action(int* dx, int* dy, int W, int H);
-
-void   timer_start(void);
-void   timer_stop(void);
-double timer_elapsed_sec(void);
-void   timer_print_mmss(void);
-
-void draw_board_with_cursor_and_status(void);
-
-#endif
-
+void boardPrintWithCursor(int cur_r, int cur_c);
 
 
 

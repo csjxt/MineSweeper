@@ -127,10 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="game_logic.c" />
-    <ClCompile Include="input_win.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="timer_win.c" />
-    <ClCompile Include="ui.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
