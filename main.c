@@ -51,7 +51,6 @@ int main(void) {
         printf("\033[H\x1b[?25l");
         boardPrint();
 
-        // 승리 조기 종료 처리
         if (hidden_count == mine_count) {
             printf("\033[%d;1H", TOP + row + 2);
             printf("지뢰 위치가 특정되어 게임이 끝났습니다.\n");
@@ -122,7 +121,7 @@ int main(void) {
                 }
             }
         }
-        Sleep(10);
+
 #endif
     }
 
