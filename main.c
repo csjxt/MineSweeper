@@ -23,10 +23,11 @@ int main(void) {
     levelSelect();
     reset();
 
-    // 첫 클릭 입력
     first_row = exception("첫 번째로 열 행", 1, row);
     first_col = exception("첫 번째로 열 열", 1, col);
-    first_row--; first_col--;
+   
+    first_row--;
+    first_col--;
 
     mineSet(first_row, first_col);
     near8space();
