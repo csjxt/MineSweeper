@@ -29,7 +29,9 @@ void boardPrint(void); //보드 출력하는 함수
 int WinOrLose(int user_row, int user_col); //승패 판정 함수
 void open8space(int user_row, int user_col); //빈칸인 주변 8칸 여는 함수
 
-void boardPrintWithCursor(int cur_r, int cur_c);
+void startTimer(void); //게임 시작 시간 저장 함수
+void getUserInputWithTime(int* user_row, int* user_col); //좌표 입력 + 경과 시간 출력 함수
+
 
 
 

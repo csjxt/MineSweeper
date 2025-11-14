@@ -11,6 +11,8 @@ int hidden_count;
 int board[MAX_ROW][MAX_COL];
 int show_board[MAX_ROW][MAX_COL];
 
+static time_t start_time; // 게임 시작 시간(시간 기록용)
+
 void ClearBuffer(void) {
 	int input;
 	while ((input = getchar()) != '\n' && input != EOF) {
@@ -253,3 +255,23 @@ void open8space(int user_row, int user_col) {
 		}
 	}
 }
+
+
+void startTimer(void) {
+	start_time = time(NULL); // 현재 시간을 start_time에 저장
+}
+
+void getUserInputWithTime(int* user_row, int* user_col) {
+	*user_row = exception("열 행 입력", 1, row);
+	*user_col = exception("열 열 입력", 1, col);
+
+	time_t now = time(NULL);          // 지금 시간
+	int elapsed = (int)(now - start_time); // 경과 시간
+
+	printf("현재까지 경과 시간: %d초\n", elapsed);
+}
+
+
+
+
+
