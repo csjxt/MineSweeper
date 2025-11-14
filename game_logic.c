@@ -264,12 +264,13 @@ void startTimer(void) {
 void getUserInputWithTime(int* user_row, int* user_col) {
 	*user_row = exception("열 행 입력", 1, row);
 	*user_col = exception("열 열 입력", 1, col);
-
-	time_t now = time(NULL);          // 지금 시간
-	int elapsed = (int)(now - start_time); // 경과 시간
-
-	printf("현재까지 경과 시간: %d초\n", elapsed);
 }
+
+int getElapsedTime(void) {
+	time_t now = time(NULL);              // 현재 시간
+	return (int)(now - start_time);       // 경과 시간(초)
+}
+
 
 
 

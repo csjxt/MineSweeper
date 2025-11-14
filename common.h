@@ -31,6 +31,7 @@ void open8space(int user_row, int user_col); //빈칸인 주변 8칸 여는 함수
 
 void startTimer(void); //게임 시작 시간 저장 함수
 void getUserInputWithTime(int* user_row, int* user_col); //좌표 입력 + 경과 시간 출력 함수
+int getElapsedTime(void); // 경과 시간(초)을 돌려주는 함수
 
 
 
