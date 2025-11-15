@@ -113,25 +113,25 @@ void mineSet(int first_row, int first_col) {
 
 	while (count < mine_count) {
 
-		int r = rand() % row;
-		int c = rand() % col;
+		int rand_row = rand() % row;
+		int rand_col = rand() % col;
 
 		// 첫 클릭 좌표와 주변 8칸 체크
-		int near_first = 0;	//0이면 지뢰 설치 가능 1이면 지뢰 설치 불가능
+		int near_first = 1;	//0이면 지뢰 설치 불가능 1이면 지뢰 설치 가능
 
 		for (int x = -1; x <= 1; x++) {	//위,아래칸
 			for (int y = -1; y <= 1; y++) {	//왼,오른쪽칸
 
-				if (r == first_row + x && c == first_col + y) {
-					near_first = 1;
+				if (rand_row == first_row + x && rand_col == first_col + y) {
+					near_first = 0;
 					break;
 				}
 			}
-			if (near_first == 1) break;
+			if (near_first == 0) break;
 		}
 
-		if (board[r][c] != MINE && near_first == 0) {
-			board[r][c] = MINE;
+		if (board[rand_row][rand_col] != MINE && near_first == 1) {
+			board[rand_row][rand_col] = MINE;
 			count++;
 		}
 	}
@@ -201,7 +201,6 @@ void boardPrint(void) {
 	printf("\n");
 }
 
-
 int WinOrLose(int user_row, int user_col) {
 
 	if (hidden_count == mine_count) {
@@ -256,12 +255,11 @@ void open8space(int user_row, int user_col) {
 	}
 }
 
-
 void startTimer(void) {
 	start_time = time(NULL); // 현재 시간을 start_time에 저장
 }
 
-void getUserInputWithTime(int* user_row, int* user_col) {
+void getUserInput(int* user_row, int* user_col) {
 	*user_row = exception("열 행 입력", 1, row);
 	*user_col = exception("열 열 입력", 1, col);
 }
@@ -270,9 +268,3 @@ int getElapsedTime(void) {
 	time_t now = time(NULL);              // 현재 시간
 	return (int)(now - start_time);       // 경과 시간(초)
 }
-
-
-
-
-
-

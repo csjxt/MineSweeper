@@ -33,45 +33,32 @@ int main(void) {
         printf("\033[H");
         boardPrint();
 
-        if (hidden_count == mine_count) { 
-            printf("지뢰 위치가 특정되어 게임이 끝났습니다.\n");
-            break;
-        }
-
-        getUserInputWithTime(&user_row, &user_col);
+        getUserInput(&user_row, &user_col);
 
         user_row--; 
         user_col--;
 
         if (show_board[user_row][user_col] == OPEN) {
-
-            int elapsed = getElapsedTime();
-            printf("현재까지 경과 시간: %d초\n", elapsed);
-
             printf("이미 연 칸입니다. 다른 칸을 선택하세요.\n");
             printf("계속 하려면 Enter를 누르세요.");
-            while (getchar() != '\n');
+            ClearBuffer();
             continue;
         }
 
-        if (board[user_row][user_col] != MINE) {
-            show_board[user_row][user_col] = OPEN;
-            hidden_count--;
+        open8space(user_row, user_col);
 
-            int elapsed = getElapsedTime();
-            printf("현재까지 경과 시간: %d초\n", elapsed);
-
-            printf("계속 하려면 Enter를 누르세요.");
-            while (getchar() != '\n');
+        if (WinOrLose(user_row, user_col) == 0) {
+            int time_used = getElapsedTime();
+            printf("총 걸린 시간: %d초\n", time_used);
+            break;
         }
 
-        if (WinOrLose(user_row, user_col) == 0)
-            break;
-
-        printf("\n");
+        else {
+            int time_used = getElapsedTime();
+            printf("현재 시간: %d초\n", time_used);
+            printf("계속 하려면 Enter를 누르세요.");
+            ClearBuffer();
+        }
     }
-
     return 0;
 }
-
-
