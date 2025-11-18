@@ -187,6 +187,9 @@ void boardPrint(void) {
 			if (show_board[i][j] == HIDDEN) { //안 열린 칸: #
 				printf(" # ");
 			}
+			else if (show_board[i][j] == FLAGGED) { // 깃발 칸
+				printf(" F ");
+			}
 			else if (show_board[i][j] == OPEN) {
 				if (board[i][j] == MINE)
 					printf(" * "); //지뢰칸: *
@@ -267,4 +270,20 @@ void getUserInput(int* user_row, int* user_col) {
 int getElapsedTime(void) {
 	time_t now = time(NULL);              // 현재 시간
 	return (int)(now - start_time);       // 경과 시간(초)
+}
+
+void toggleFlag(int user_row, int user_col) {
+	if (show_board[user_row][user_col] == OPEN) {
+		printf("이미 열린 칸에는 깃발을 꽂을 수 없습니다.\n");
+		return;
+	}
+
+	// 안 열린 칸이면 깃발로 변경
+	if (show_board[user_row][user_col] == HIDDEN) {
+		show_board[user_row][user_col] = FLAGGED;
+	}
+	// 이미 깃발이면 다시 안 열린 칸으로 해제
+	else if (show_board[user_row][user_col] == FLAGGED) {
+		show_board[user_row][user_col] = HIDDEN;
+	}
 }

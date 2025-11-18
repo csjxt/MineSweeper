@@ -27,16 +27,35 @@ int main(void) {
     startTimer(); // 첫 클릭 후부터 시간을 재기 시작
 
     int user_row, user_col; 
+    int action; //선택 변수 (1: 열기, 2: 깃발)
 
     for (;;) {
         printf("\033[2J");
         printf("\033[H");
         boardPrint();
 
+        action = exception("행동 선택 (1.열기 2.깃발)", 1, 2);
+
         getUserInput(&user_row, &user_col);
 
         user_row--; 
         user_col--;
+
+        //깃발모드
+        if (action == 2) {
+            toggleFlag(user_row, user_col);
+            // 깃발만 꽂고 루프 다시 시작 (승패 판정 불필요)
+            continue;
+        }
+
+        //열기모드
+        // 깃발이 꽂혀있는 칸은 열지 못하도록 보호
+        if (show_board[user_row][user_col] == FLAGGED) {
+            printf("깃발이 꽂힌 칸입니다. 깃발을 해제하고 여세요.\n");
+            printf("계속 하려면 Enter를 누르세요.");
+            ClearBuffer();
+            continue;
+        }
 
         if (show_board[user_row][user_col] == OPEN) {
             printf("이미 연 칸입니다. 다른 칸을 선택하세요.\n");
