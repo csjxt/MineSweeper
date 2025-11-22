@@ -207,16 +207,6 @@ void boardPrint(void) {
 
 int WinOrLose(int user_row, int user_col) {
 
-	if (hidden_count == mine_count) {
-
-		printf("\033[2J");	// 화면 지우기
-		printf("\033[H");	// 커서 맨 위로 이동
-		boardPrint();
-		printf("지뢰가 없는 칸을 모두 열었습니다. 게임 승리\n");
-
-		return 0;
-	}
-
 	if (board[user_row][user_col] == MINE) {
 		board[user_row][user_col] = Clicked_MINE;
 
@@ -232,6 +222,17 @@ int WinOrLose(int user_row, int user_col) {
 
 		return 0;
 	}
+
+	if (hidden_count == mine_count) {
+
+		printf("\033[2J");	// 화면 지우기
+		printf("\033[H");	// 커서 맨 위로 이동
+		boardPrint();
+		printf("지뢰가 없는 칸을 모두 열었습니다. 게임 승리\n");
+
+		return 0;
+	}
+
 	return 1; // 게임 진행 중
 }
 
