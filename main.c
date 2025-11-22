@@ -3,6 +3,7 @@
 #include <time.h>
 #include "common.h"
 #pragma warning (disable:4996)
+//1학년 2학기 C프로그래밍 지뢰찾기 프로그램 
 
 int main(void) {
 

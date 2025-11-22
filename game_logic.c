@@ -88,7 +88,8 @@ void levelSelect(void) {
 				continue;
 			}
 
-			int max_mines = (row * col) - 9;	//지뢰를 배치할수있는 최대 개수			
+			int max_mines = (row * col) - 9;	//지뢰를 배치할수있는 최대 개수	
+
 			mine_count = exception("지뢰 개수를 입력하시오", 1, max_mines);
 			hidden_count = row * col;
 

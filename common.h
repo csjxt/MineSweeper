@@ -33,6 +33,3 @@ void startTimer(void); //게임 시작 시간 저장 함수
 void getUserInput(int* user_row, int* user_col); //좌표 입력
 int getElapsedTime(void); // 경과 시간(초)을 돌려주는 함수
 void toggleFlag(int user_row, int user_col);// 깃발 꽂기/해제 함수
-
-
-
