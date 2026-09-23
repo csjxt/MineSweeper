@@ -10,15 +10,13 @@
 #define MINE -1 //지뢰가 있는칸
 #define Clicked_MINE -2 //사용자가 연 지뢰칸
 
-
 extern int row; //행
 extern int col; //열
 extern int mine_count; //지뢰개수
 extern int hidden_count; //열리지 않은 칸 개수
 
-
-extern int board[MAX_ROW][MAX_COL];	//값 바꾸면 안됨(정답보드)
-extern int show_board[MAX_ROW][MAX_COL];	//사용자에게 보여줄 보드
+extern int board[MAX_ROW][MAX_COL];	
+extern int show_board[MAX_ROW][MAX_COL]; //사용자에게 보여줄 보드
 
 void ClearBuffer(void);    //입력 버퍼 비우는 함수
 void levelSelect(void);	//난이도 선택 함수
@@ -30,3 +28,8 @@ int exception(const char* message, int min, int max);	//입력할때 특정범위 정수만
 void boardPrint(void); //보드 출력하는 함수
 int WinOrLose(int user_row, int user_col); //승패 판정 함수
 void open8space(int user_row, int user_col); //빈칸인 주변 8칸 여는 함수
+
+void startTimer(void); //게임 시작 시간 저장 함수
+void getUserInput(int* user_row, int* user_col); //좌표 입력
+int getElapsedTime(void); // 경과 시간(초)을 돌려주는 함수
+void toggleFlag(int user_row, int user_col);// 깃발 꽂기/해제 함수

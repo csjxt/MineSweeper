@@ -11,6 +11,8 @@ int hidden_count;
 int board[MAX_ROW][MAX_COL];
 int show_board[MAX_ROW][MAX_COL];
 
+static time_t start_time; // 게임 시작 시간(시간 기록용)
+
 void ClearBuffer(void) {
 	int input;
 	while ((input = getchar()) != '\n' && input != EOF) {
@@ -86,7 +88,8 @@ void levelSelect(void) {
 				continue;
 			}
 
-			int max_mines = (row * col) - 9;	//지뢰를 배치할수있는 최대 개수			
+			int max_mines = (row * col) - 9;	//지뢰를 배치할수있는 최대 개수	
+
 			mine_count = exception("지뢰 개수를 입력하시오", 1, max_mines);
 			hidden_count = row * col;
 
@@ -111,25 +114,25 @@ void mineSet(int first_row, int first_col) {
 
 	while (count < mine_count) {
 
-		int r = rand() % row;
-		int c = rand() % col;
+		int rand_row = rand() % row;
+		int rand_col = rand() % col;
 
 		// 첫 클릭 좌표와 주변 8칸 체크
-		int near_first = 0;	//0이면 지뢰 설치 가능 1이면 지뢰 설치 불가능
+		int near_first = 1;	//0이면 지뢰 설치 불가능 1이면 지뢰 설치 가능
 
 		for (int x = -1; x <= 1; x++) {	//위,아래칸
 			for (int y = -1; y <= 1; y++) {	//왼,오른쪽칸
 
-				if (r == first_row + x && c == first_col + y) {
-					near_first = 1;
+				if (rand_row == first_row + x && rand_col == first_col + y) {
+					near_first = 0;
 					break;
 				}
 			}
-			if (near_first == 1) break;
+			if (near_first == 0) break;
 		}
 
-		if (board[r][c] != MINE && near_first == 0) {
-			board[r][c] = MINE;
+		if (board[rand_row][rand_col] != MINE && near_first == 1) {
+			board[rand_row][rand_col] = MINE;
 			count++;
 		}
 	}
@@ -185,6 +188,9 @@ void boardPrint(void) {
 			if (show_board[i][j] == HIDDEN) { //안 열린 칸: #
 				printf(" # ");
 			}
+			else if (show_board[i][j] == FLAGGED) { // 깃발 칸
+				printf(" F ");
+			}
 			else if (show_board[i][j] == OPEN) {
 				if (board[i][j] == MINE)
 					printf(" * "); //지뢰칸: *
@@ -199,18 +205,7 @@ void boardPrint(void) {
 	printf("\n");
 }
 
-
 int WinOrLose(int user_row, int user_col) {
-
-	if (hidden_count == mine_count) {
-
-		printf("\033[2J");	// 화면 지우기
-		printf("\033[H");	// 커서 맨 위로 이동
-		boardPrint();
-		printf("지뢰가 없는 칸을 모두 열었습니다. 게임 승리\n");
-
-		return 0;
-	}
 
 	if (board[user_row][user_col] == MINE) {
 		board[user_row][user_col] = Clicked_MINE;
@@ -227,6 +222,17 @@ int WinOrLose(int user_row, int user_col) {
 
 		return 0;
 	}
+
+	if (hidden_count == mine_count) {
+
+		printf("\033[2J");	// 화면 지우기
+		printf("\033[H");	// 커서 맨 위로 이동
+		boardPrint();
+		printf("지뢰가 없는 칸을 모두 열었습니다. 게임 승리\n");
+
+		return 0;
+	}
+
 	return 1; // 게임 진행 중
 }
 
@@ -251,5 +257,35 @@ void open8space(int user_row, int user_col) {
 			if (real_row >= 0 && real_row < row && real_col >= 0 && real_col < col)
 				open8space(real_row, real_col);
 		}
+	}
+}
+
+void startTimer(void) {
+	start_time = time(NULL); // 현재 시간을 start_time에 저장
+}
+
+void getUserInput(int* user_row, int* user_col) {
+	*user_row = exception("열 행 입력", 1, row);
+	*user_col = exception("열 열 입력", 1, col);
+}
+
+int getElapsedTime(void) {
+	time_t now = time(NULL);              // 현재 시간
+	return (int)(now - start_time);       // 경과 시간(초)
+}
+
+void toggleFlag(int user_row, int user_col) {
+	if (show_board[user_row][user_col] == OPEN) {
+		printf("이미 열린 칸에는 깃발을 꽂을 수 없습니다.\n");
+		return;
+	}
+
+	// 안 열린 칸이면 깃발로 변경
+	if (show_board[user_row][user_col] == HIDDEN) {
+		show_board[user_row][user_col] = FLAGGED;
+	}
+	// 이미 깃발이면 다시 안 열린 칸으로 해제
+	else if (show_board[user_row][user_col] == FLAGGED) {
+		show_board[user_row][user_col] = HIDDEN;
 	}
 }

@@ -1,64 +1,84 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include "common.h"
 #pragma warning (disable:4996)
+//1í•™ë…„ 2í•™ê¸° Cí”„ë¡œê·¸ë˜ë° ì§€ë¢°ì°¾ê¸° í”„ë¡œê·¸ë¨ 
 
 int main(void) {
 
-	int first_row, first_col;	//Ã¹¹øÂ° Å¬¸¯(¹Ù·Î ÆĞ¹è ¹æÁö)
+    int first_row, first_col;
 
-	srand(time(NULL));
+    srand((unsigned int)time(NULL)); // ê²½ê³  ì œê±°ìš©
 
-	levelSelect();
-	reset();
+    levelSelect();
+    reset();
 
-	first_row = exception("Ã¹ ¹øÂ°·Î ¿­ Çà", 1, row);
-	first_col = exception("Ã¹ ¹øÂ°·Î ¿­ ¿­", 1, col);
+    first_row = exception("ì²« ë²ˆì§¸ë¡œ ì—´ í–‰", 1, row);
+    first_col = exception("ì²« ë²ˆì§¸ë¡œ ì—´ ì—´", 1, col);
 
-	first_row--;	//0ºÎÅÍ ½ÃÀÛÇÏ°Ô º¯°æ
-	first_col--;
+    first_row--;  
+    first_col--;
 
-	mineSet(first_row, first_col);
-	near8space();
+    mineSet(first_row, first_col);
+    near8space();
 
-	open8space(first_row, first_col); // Ã¹ Å¬¸¯ ½Ã ÁÖº¯ ºñ¾îÀÖ´Â Ä­ ¿ÀÇÂ
+    open8space(first_row, first_col); 
 
-	int user_row, user_col; //Çà ¿­ ÀÔ·Â¹Ş´Â º¯¼ö
+    startTimer(); // ì²« í´ë¦­ í›„ë¶€í„° ì‹œê°„ì„ ì¬ê¸° ì‹œì‘
 
-	for (;;) {
-		printf("\033[2J");
-		printf("\033[H");
-		boardPrint();
+    int user_row, user_col; 
+    int action; //ì„ íƒ ë³€ìˆ˜ (1: ì—´ê¸°, 2: ê¹ƒë°œ)
 
-		if (hidden_count == mine_count) { // Ä¿½ºÅÒ ³­ÀÌµµ¿¡¼­ Ã¹ Å¬¸¯À¸·Î ÀÎÇÑ ºóÄ­ ¿­¸² ¶§¹®¿¡ Áö·Ú À§Ä¡°¡ ¹Ù·Î Æ¯Á¤µÇ´Â °æ¿ì
-			printf("Áö·Ú À§Ä¡°¡ Æ¯Á¤µÇ¾î °ÔÀÓÀÌ ³¡³µ½À´Ï´Ù.\n");
-			break;
-		}
+    for (;;) {
+        printf("\033[2J");
+        printf("\033[H");
+        boardPrint();
 
-		user_row = exception("¿­ Çà ÀÔ·Â", 1, row);
-		user_col = exception("¿­ ¿­ ÀÔ·Â", 1, col);
+        action = exception("í–‰ë™ ì„ íƒ (1.ì—´ê¸° 2.ê¹ƒë°œ)", 1, 2);
 
-		user_row--;	//ÀÎµ¦½º °ªÀ¸·Î º¯°æ
-		user_col--;
+        getUserInput(&user_row, &user_col);
 
-		if (show_board[user_row][user_col] == OPEN) {
-			printf("ÀÌ¹Ì ¿¬ Ä­ÀÔ´Ï´Ù. ´Ù¸¥ Ä­À» ¼±ÅÃÇÏ¼¼¿ä.\n");
-			printf("°è¼Ó ÇÏ·Á¸é Enter¸¦ ´©¸£¼¼¿ä.");
-			while (getchar() != '\n');
-			continue;
-		}
-		if (board[user_row][user_col] != MINE) {
-			show_board[user_row][user_col] = OPEN;
-			hidden_count--;
-		}
+        user_row--; 
+        user_col--;
 
-		if (WinOrLose(user_row, user_col) == 0)
-			break;
+        //ê¹ƒë°œëª¨ë“œ
+        if (action == 2) {
+            toggleFlag(user_row, user_col);
+            // ê¹ƒë°œë§Œ ê½‚ê³  ë£¨í”„ ë‹¤ì‹œ ì‹œì‘ (ìŠ¹íŒ¨ íŒì • ë¶ˆí•„ìš”)
+            continue;
+        }
 
-		printf("\n");
-	}
+        //ì—´ê¸°ëª¨ë“œ
+        // ê¹ƒë°œì´ ê½‚í˜€ìˆëŠ” ì¹¸ì€ ì—´ì§€ ëª»í•˜ë„ë¡ ë³´í˜¸
+        if (show_board[user_row][user_col] == FLAGGED) {
+            printf("ê¹ƒë°œì´ ê½‚íŒ ì¹¸ì…ë‹ˆë‹¤. ê¹ƒë°œì„ í•´ì œí•˜ê³  ì—¬ì„¸ìš”.\n");
+            printf("ê³„ì† í•˜ë ¤ë©´ Enterë¥¼ ëˆ„ë¥´ì„¸ìš”.");
+            ClearBuffer();
+            continue;
+        }
 
+        if (show_board[user_row][user_col] == OPEN) {
+            printf("ì´ë¯¸ ì—° ì¹¸ì…ë‹ˆë‹¤. ë‹¤ë¥¸ ì¹¸ì„ ì„ íƒí•˜ì„¸ìš”.\n");
+            printf("ê³„ì† í•˜ë ¤ë©´ Enterë¥¼ ëˆ„ë¥´ì„¸ìš”.");
+            ClearBuffer();
+            continue;
+        }
 
-		return 0;
+        open8space(user_row, user_col);
+
+        if (WinOrLose(user_row, user_col) == 0) {
+            int time_used = getElapsedTime();
+            printf("ì´ ê±¸ë¦° ì‹œê°„: %dì´ˆ\n", time_used);
+            break;
+        }
+
+        else {
+            int time_used = getElapsedTime();
+            printf("í˜„ì¬ ì‹œê°„: %dì´ˆ\n", time_used);
+            printf("ê³„ì† í•˜ë ¤ë©´ Enterë¥¼ ëˆ„ë¥´ì„¸ìš”.");
+            ClearBuffer();
+        }
+    }
+    return 0;
 }
